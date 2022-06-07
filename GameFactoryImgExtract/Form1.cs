@@ -116,7 +116,7 @@ namespace GameFactoryImgExtract
                 EncodedImage encodedImage = imgFile.GetImage(img);
                 if (encodedImage.CreationInfo.FileLen == 0)
                 {
-                    log += $"{img} empty, skipping";
+                    log += $"{DateTime.Now:g} : ID {img}/{imgFile.ImageCount} empty, skipping\n";
                     img++;
                     continue;
                 }
@@ -126,7 +126,7 @@ namespace GameFactoryImgExtract
                 (Image bmp, Exception? ex) = encodedImage.GetImage();
                 if (ex != null)
                 {
-                    log += $"{img} broken, saving anyway: ({ex.Message})";
+                    log += $"{DateTime.Now:g} : ID {img}/{imgFile.ImageCount} broken, saving anyway: ({ex.Message})\n";
                 }
                 bmp.Save(file);
                 bmp.Dispose();
@@ -138,6 +138,25 @@ namespace GameFactoryImgExtract
             }
             this.Invoke(() => { progressBar1.Value = 0; });
             this.Invoke(EnableAllButtons);
+            if (!string.IsNullOrWhiteSpace(log))
+            {
+                bool msgR = false;
+                this.Invoke(() =>
+                {
+                    if (MessageBox.Show("Log was created, do you want to open it now?", "Log created", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        msgR = true;
+                });
+                if (msgR)
+                {
+                    new System.Diagnostics.Process
+                    {
+                        StartInfo = new(path + "\\log.txt")
+                        {
+                            UseShellExecute = true
+                        }
+                    }.Start();
+                }
+            }
         }
 
         private void Button4_Click(object sender, EventArgs e)
