@@ -5,6 +5,8 @@ Images are saved as .pngs and include transparency.
 
 Only one type of .img files is supported currently, and it doesn't work perfectly yet.
 
+Save all feature will create log if it encounters any errors.
+
 ## How to use
 
  1. Open .img (image) file
