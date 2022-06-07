@@ -214,6 +214,7 @@ namespace GameFactoryImgExtract
             uint colorPointer = pointerList[0].colorListLine + 4;
             uint colorRepeat = 0;
             bool colorMode = false;
+            int tempColor = 0x80;
             Color color = Color.FromArgb(0, 0, 0);
             for (int y = 0; y < _header.sizeY; y++)
             {
@@ -256,6 +257,27 @@ namespace GameFactoryImgExtract
                             _colorData[x + i, y] = color;
                             colorRepeat--;
                         }
+
+
+                        while ((tempColor & 0x7F) == 0x0)
+                        {
+                            if ((tempColor & 0x80) == 0)
+                            {
+
+                            }
+                            if (!Header.CompressionRLE)
+                            {
+                                tempColor = _compressedImageData[colorPointer];
+                                colorPointer--;
+                            }
+                            else
+                            {
+                                tempColor = 0x81;
+                            }
+                        }
+
+
+                        tempColor--;
                     }
                     x += opaque;
                 } while (x < _header.sizeX);

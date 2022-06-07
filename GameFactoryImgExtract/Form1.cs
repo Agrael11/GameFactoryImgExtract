@@ -46,7 +46,7 @@ namespace GameFactoryImgExtract
                 $"Width: {encodedImage.Size.Width}x{encodedImage.Size.Height}\n" +
                 $"File Size: {encodedImage.Header.fileLength}\n" +
                 $"Color Mode: {encodedImage.Header.colorMode}\n" +
-                $"Compression: {(encodedImage.Header.CompressionTGF ? "TGF" : (encodedImage.Header.CompressionRLE ? "RLE" : "None"))}\n" +
+                $"Compression: {(encodedImage.Header.CompressionTGF ? "TGF" : "")} {(encodedImage.Header.CompressionRLE ? "RLE" : "None")}\n" +
                 $"Successfully Loaded: {(encodedImage.IsLoaded ? "Yes" : "No")}" +
                 $"{(string.IsNullOrWhiteSpace(error) ? "" : "\n" + error)}";
             return string.IsNullOrWhiteSpace(error);
@@ -90,6 +90,7 @@ namespace GameFactoryImgExtract
         {
             if (imgFile == null) return;
             if (image > 0) image--;
+            textBox1.Text = image.ToString();
             LoadImage(image);
         }
 
@@ -97,6 +98,7 @@ namespace GameFactoryImgExtract
         {
             if (imgFile == null) return;
             if (image < imgFile.ImageCount - 1) image++;
+            textBox1.Text = image.ToString();
             LoadImage(image);
         }
 
@@ -126,7 +128,8 @@ namespace GameFactoryImgExtract
                 (Image bmp, Exception? ex) = encodedImage.GetImage();
                 if (ex != null)
                 {
-                    log += $"{DateTime.Now:g} : ID {img}/{imgFile.ImageCount} broken, saving anyway: ({ex.Message})\n";
+                    log += $"{DateTime.Now:g} : ID {img}/{imgFile.ImageCount} broken, saving anyway: ({ex.Message})\n" +
+                        $"Compression: {(encodedImage.Header.CompressionTGF?"TGF":"")} {(encodedImage.Header.CompressionRLE?"RLE":"")}\n";
                 }
                 bmp.Save(file);
                 bmp.Dispose();
@@ -166,7 +169,7 @@ namespace GameFactoryImgExtract
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 DisableAllButtons();
-                Task task = new Task(() => { SaveFiles(dialog.SelectedPath); });
+                Task task = new(() => { SaveFiles(dialog.SelectedPath); });
                 task.Start();
             }
         }
@@ -207,6 +210,36 @@ namespace GameFactoryImgExtract
             button3.Enabled = true;
             button4.Enabled = true;
             button5.Enabled = true;
+        }
+
+        private void TextBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyValue >= (int)'0' && e.KeyValue <= (int)'9')
+            {
+                return;
+            }
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (imgFile == null)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                int newData = int.Parse(textBox1.Text);
+                if (newData < imgFile.ImageCount && newData >= 0)
+                {
+                    image = newData;
+                    LoadImage(image);
+                }
+                else
+                {
+                    textBox1.Text = image.ToString();
+                }
+            }
+
+            e.Handled = true;
         }
     }
 }
